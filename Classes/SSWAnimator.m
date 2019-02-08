@@ -52,9 +52,9 @@ UIViewAnimationOptions const SSWNavigationTransitionCurve = 7 << 16;
 
     // parallax effect; the offset matches the one used in the pop animation in iOS 7.1
     CGFloat toViewControllerXTranslation = - CGRectGetWidth([transitionContext containerView].bounds) * 0.3f;
-    toViewController.view.bounds = [transitionContext containerView].bounds;
-    toViewController.view.center = [transitionContext containerView].center;
-    toViewController.view.transform = CGAffineTransformMakeTranslation(toViewControllerXTranslation, 0);
+    CGRect frame = toViewController.view.frame;
+    frame.origin.x += toViewControllerXTranslation;
+    toViewController.view.frame = frame;
 
     // add a shadow on the left side of the frontmost view controller
     [fromViewController.view addLeftSideShadowWithFading];
@@ -91,8 +91,11 @@ UIViewAnimationOptions const SSWNavigationTransitionCurve = 7 << 16;
     // Uses linear curve for an interactive transition, so the view follows the finger. Otherwise, uses a navigation transition curve.
     UIViewAnimationOptions curveOption = [transitionContext isInteractive] ? UIViewAnimationOptionCurveLinear : SSWNavigationTransitionCurve;
 
+    CGPoint newOrigin = CGPointMake([transitionContext containerView].frame.origin.x, frame.origin.y);
+    CGRect newFrame = [transitionContext containerView].frame;
+    newFrame.origin = newOrigin;
     [UIView animateWithDuration:[self transitionDuration:transitionContext] delay:0 options:UIViewAnimationOptionTransitionNone | curveOption animations:^{
-        toViewController.view.transform = CGAffineTransformIdentity;
+        toViewController.view.frame = newFrame;
         fromViewController.view.transform = CGAffineTransformMakeTranslation(toViewController.view.frame.size.width, 0);
         dimmingView.alpha = 0.0f;
 
